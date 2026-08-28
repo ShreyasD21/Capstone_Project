@@ -3,8 +3,8 @@ from lambeq import AtomicType, IQPAnsatz, Sim14Ansatz
 class CircuitCompiler:
     def __init__(self , ansatz_type : str = "IQP" , l : int = 1):
         self.type_map = {
-            AtomicType.Noun : 1,
-            AtomicType.Sentence : 1
+            AtomicType.NOUN : 1,
+            AtomicType.SENTENCE : 1
         }
         
         if ansatz_type == "IQP":

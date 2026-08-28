@@ -1,4 +1,4 @@
-from lambeq.rewriter import RemoveCupsRewriter
+from lambeq import RemoveCupsRewriter
 
 class DiagramRewriter: 
     def __init__(self):
