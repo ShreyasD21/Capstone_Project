@@ -1,8 +1,8 @@
 import re
 import pandas as pd
 
-def clean_and_align(df: pd.DataFrame) -> pd.DataFrame:            #dropping empty and duplicated rows
-  def strip_artifacts(text: str) -> str:                          #removing hidden PGN artifacts from comments
+def clean_and_align(df: pd.DataFrame) -> pd.DataFrame:            # dropping empty and duplicated rows
+  def strip_artifacts(text: str) -> str:                          # removing hidden PGN artifacts from comments
         text = re.sub(r"\[%.*?\]", "", text)  
         text = re.sub(r"\s+", " ", text).strip()
         return text
