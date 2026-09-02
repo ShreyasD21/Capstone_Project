@@ -15,8 +15,6 @@ def parse_to_diagrams(sentences: list[str]):
     return results, failed
  
 def build_type_inventory(diagrams: list) -> pd.Series:
-    """Counts every distinct pregroup type across diagrams -- share this
-    with Sandeep, it determines his ansatz type_map / qubit allocation."""
     counts = Counter()
     for _, diagram in diagrams:
         for box in diagram.boxes:
