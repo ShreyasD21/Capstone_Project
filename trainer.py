@@ -1,5 +1,5 @@
 import torch
-from qnlpmodel import chessQNLPModel
+from qnlp_model import chessQNLPModel
 from data_orchestor import run_data_pipeline
 
 def train(prepared_data: list, num_classes: int = 3):
