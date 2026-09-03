@@ -27,10 +27,11 @@ def train(prepared_data: list, num_classes: int = 3):
         
         print(f"Epoch {epoch:02d}/{epoch:02d} | Loss: {loss.item():.4f} | Acc: {acc:.1f}%") 
     torch.save(model.state_dict(), "models/chess_qnlp_model.pt")
+    print("Model saved to 'chess_qnlp_model.pt and returned exported model weights")
     return exporter( model , prepared_data)
-    print("Model saved to 'chess_qnlp_model.pt'")
 
 if __name__ == "__main__":             
     path = "data.pkl"
     prepared_data = run_data_pipeline(path)
-    train(prepared_data, 3)
+    torch.save(train(prepared_data, 4) , "handoff/combined_features.pt")
+
