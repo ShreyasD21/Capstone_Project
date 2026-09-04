@@ -5,14 +5,21 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 from exporter import exporter
 
-def train(prepared_data: list, num_classes: int = 3):
-    compiled_circuits = [item['diagram'] for item in prepared_data]
-    
-    labels = torch.stack([item['label'] for item in prepared_data])
+def train(train_path : str = "data/handoff/train.pkl" , val_path: str = "data/handoff/val.pkl" , lr : float = 0.001 , epochs : int = 10):
+    train_data = run_data_pipeline(train_path)
+    val_data = run_data_pipeline(val_path)
 
-    model = chessQNLPModel(compiled_circuits, num_classes=num_classes)
-    epochs = 6
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    train_circuits = [item['diagram'] for item in train_data]
+    train_boards = [item['board_vector'] for item in train_data]
+    train_labels = [item['lavel'] for item in train_data]
+
+    val_circuits = [item['diagram'] for item in val_data]
+    val_boards = [item['board_vector'] for item in val_data]
+    val_labels = [item['label'] for item in val_data]
+
+
+    model = chessQNLPModel(compiled_circuits, num_classes=num_classes , board_dim=train_boards.shape[-1])
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = torch.nn.CrossEntropyLoss()
     model.train()
 # epoch implementation
@@ -30,8 +37,9 @@ def train(prepared_data: list, num_classes: int = 3):
     print("Model saved to 'chess_qnlp_model.pt and returned exported model weights")
     return exporter( model , prepared_data)
 
-if __name__ == "__main__":             
-    path = "data.pkl"
-    prepared_data = run_data_pipeline(path)
-    torch.save(train(prepared_data, 4) , "handoff/combined_features.pt")
 
+
+
+if __name__ == "__main__":             
+
+ 
