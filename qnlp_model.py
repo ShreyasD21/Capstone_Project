@@ -10,7 +10,7 @@ class chessQNLPModel(nn.Module):
             self.model.initialise_weights()
         
         self.num_classes = num_classes
-        quantum_dims  = [self.model[c].shape[-1] for c in compiled_circuits]
+        quantum_dims  = [self.model([c]).shape[-1] for c in compiled_circuits]
         unique_dims = set(quantum_dims)
         assert len(unique_dims) == 1, (
             f"Dimension mismatch across compiled circuits: found wire/qubit output widths {unique_dims}."
