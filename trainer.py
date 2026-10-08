@@ -3,10 +3,11 @@ import torch
 from sklearn.metrics import classification_report, confusion_matrix
 from qnlp_model import chessQNLPModel
 from data_orchestor import run_data_pipeline
-from torch.utils.data import DataLoader
-import torch.nn as nn
 from exporter import exporter
-NUM_ClASSES = 5
+
+
+NUM_CLASSES = 5
+CLASS_NAMES = ("none", "pin", "fork", "sacrifice", "blunder")
 
 def evaluate_split(model, circuits, boards, labels, criterion):
     model.eval()
@@ -23,27 +24,29 @@ def train(train_path : str = "data/handoff/train.pkl" , val_path: str = "data/ha
     test_data = run_data_pipeline(test_path)
 
     train_circuits = [item['diagram'] for item in train_data]
-    train_boards = [item['board_vector'] for item in train_data]
-    train_labels = [item['label'] for item in train_data]
+    train_boards = torch.stack([item['board_vector'] for item in train_data])
+    train_labels = torch.stack([item['label'] for item in train_data])
 
     val_circuits = [item['diagram'] for item in val_data]
-    val_boards = [item['board_vector'] for item in val_data]
-    val_labels = [item['label'] for item in val_data]
+    val_boards = torch.stack([item['board_vector'] for item in val_data])
+    val_labels = torch.stack([item['label'] for item in val_data])
 
     test_circuits = [item['diagram'] for item in test_data]
     test_boards = torch.stack([item['board_vector'] for item in test_data])
     test_labels = torch.stack([item['label'] for item in test_data])
 
-    num_classes = int(torch.max(torch.cat([train_labels, val_labels])).item() + 1)
-
-    model = chessQNLPModel(train_circuits ,  num_classes=num_classes , board_dim=train_boards.shape[-1])
+    model = chessQNLPModel(
+        train_circuits,
+        num_classes=NUM_CLASSES,
+        board_dim=train_boards.shape[-1],
+    )
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = torch.nn.CrossEntropyLoss()
 # epoch implementation
     for epoch in range (1 , epochs+1):
         model.train()
         optimizer.zero_grad()
-        logits = model(train_circuits , train_boards)
+        logits, _ = model(train_circuits, train_boards)
         loss = criterion(logits, train_labels)  
         loss.backward()
         optimizer.step()
@@ -60,8 +63,21 @@ def train(train_path : str = "data/handoff/train.pkl" , val_path: str = "data/ha
     test_loss, test_acc, test_preds = evaluate_split(model, test_circuits, test_boards, test_labels, criterion)
     print("\n--- Final Test Set Performance ---")
     print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
-    print("\nClassification Report:\n", classification_report(test_labels.numpy(), test_preds.numpy(), digits=4))
-    print("Confusion Matrix:\n", confusion_matrix(test_labels.numpy(), test_preds.numpy()))
+    print(
+        "\nClassification Report:\n",
+        classification_report(
+            test_labels.numpy(),
+            test_preds.numpy(),
+            labels=range(NUM_CLASSES),
+            target_names=CLASS_NAMES,
+            digits=4,
+            zero_division=0,
+        ),
+    )
+    print(
+        "Confusion Matrix:\n",
+        confusion_matrix(test_labels.numpy(), test_preds.numpy(), labels=range(NUM_CLASSES)),
+    )
 
     os.makedirs("models", exist_ok=True)
     os.makedirs("data/handoff", exist_ok=True)

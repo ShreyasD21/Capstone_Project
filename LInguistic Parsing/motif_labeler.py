@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
  
 LABEL2ID = {
@@ -8,26 +10,45 @@ LABEL2ID = {
     "blunder": 4,
 }
  
-# Keywords - just a baseline, not a final labeling strategy.
-MOTIF_KEYWORDS = {                                                                 
-    "blunder": ["blunder", "??", "loses material", "mistake"],                                   
-    "pin": ["pin", "pinned"],
-    "fork": ["fork", "forking"],
-    "sacrifice": ["sac", "sacrifice", "sacrificing"],
+# These are deliberately regexes instead of substring checks.  For example,
+# ``"pin" in "developing"`` and ``"sac" in "sacrosanct"`` are true, but
+# neither annotation describes a chess motif.  ``\b`` preserves valid word
+# forms such as "pinned", "forking", and "sacrificed".
+#
+# The labeler is single-label.  Rules keep the original priority order, so a
+# comment that contains both ``??`` and "sacrifice" is labelled "blunder".
+MOTIF_PATTERNS = {
+    "blunder": (
+        re.compile(r"\?\?"),
+        re.compile(r"\bblunder(?:s|ed|ing)?\b"),
+        re.compile(r"\bmistake(?:s)?\b"),
+        re.compile(r"\blos(?:e|es|t)\s+(?:the\s+)?(?:material|exchange|piece)\b"),
+    ),
+    "pin": (
+        re.compile(r"\bpin(?:s|ned|ning)?\b"),
+    ),
+    "fork": (
+        re.compile(r"\bfork(?:s|ed|ing)?\b"),
+    ),
+    "sacrifice": (
+        re.compile(r"\bsacrifice(?:s|d|ing)?\b"),
+        re.compile(r"\bsacs?\b"),
+    ),
 }
- 
+
+
+def assign_motif_label(comment: str) -> str:
+    """Return the first supported chess motif found in one annotation."""
+    text = str(comment).lower()
+    for label, patterns in MOTIF_PATTERNS.items():
+        if any(pattern.search(text) for pattern in patterns):
+            return label
+    return "none"
+
  
 def label_motifs(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
- 
-    def assign_label(comment: str) -> str:
-        lower = comment.lower()
-        for label, keywords in MOTIF_KEYWORDS.items():
-            if any(kw in lower for kw in keywords):
-                return label
-        return "none"
- 
-    df["motif_label"] = df["comment"].apply(assign_label)
+    df["motif_label"] = df["comment"].apply(assign_motif_label)
     df["label_id"] = df["motif_label"].map(LABEL2ID)
     return df
  
