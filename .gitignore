@@ -1,0 +1,4 @@
+data/raw/
+data/handoff/*.pkl
+__pycache__/
+*.pyc
