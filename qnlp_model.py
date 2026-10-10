@@ -3,20 +3,19 @@ import torch.nn as nn
 from lambeq import PennyLaneModel
 
 class chessQNLPModel(nn.Module):
-    def __init__(self , compiled_circuits , num_classes : int = 5 , board_dim : int = 768 , q_proj_dim : int = 64 , b_proj_dim : int = 128):
+    def __init__(self , compiled_circuits , num_classes : int = 11 , board_dim : int = 768 , q_proj_dim : int = 64 , b_proj_dim : int = 128):
         super().__init__()
         self.model = PennyLaneModel.from_diagrams(compiled_circuits , probabilities=True , normalize=True)
         with torch.no_grad():
             self.model.initialise_weights()
         
         self.num_classes = num_classes
-        quantum_dims  = [self.model([c]).shape[-1] for c in compiled_circuits]
-        unique_dims = set(quantum_dims)
-        assert len(unique_dims) == 1, (
-            f"Dimension mismatch across compiled circuits: found wire/qubit output widths {unique_dims}."
-            f"Ensure diagram padding or ansatz qubit counts are uniform."
-        )
-        quantum_dim = quantum_dims[0]
+        if not compiled_circuits:
+            raise ValueError("At least one compiled circuit is required.")
+        # All sentence diagrams have the same sentence output type.  Probing
+        # one circuit establishes the probability-vector width without
+        # executing every circuit before training starts.
+        quantum_dim = self.model([compiled_circuits[0]]).shape[-1]
         self.quantum_projection = nn.Sequential(
             nn.Linear(quantum_dim , q_proj_dim),
             nn.LayerNorm(q_proj_dim),

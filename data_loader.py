@@ -15,6 +15,6 @@ class ChessQNLPDataset(Dataset):
         diagram , board_vector , label = self.raw_data[idx]
 
         board_tensor = torch.tensor(board_vector , dtype=torch.float32)
-        label_tensor = torch.tensor(label , dtype=torch.long)
+        label_tensor = torch.tensor(label, dtype=torch.float32)
 
         return diagram, board_tensor , label_tensor

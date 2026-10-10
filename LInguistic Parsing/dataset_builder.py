@@ -3,6 +3,8 @@ import random
 from pathlib import Path
  
 import pandas as pd
+
+from labeled_dataset_loader import MOTIF_COLUMNS
  
  
 def assemble_triples(df: pd.DataFrame, diagrams: list) -> list:
@@ -12,7 +14,8 @@ def assemble_triples(df: pd.DataFrame, diagrams: list) -> list:
         diagram = diagram_map.get(row["comment"])
         if diagram is None:
             continue
-        triples.append((diagram, row["board_vector"], row["label_id"]))
+        labels = row.loc[list(MOTIF_COLUMNS)].to_numpy(dtype="float32")
+        triples.append((diagram, row["board_vector"], labels))
     return triples
  
  
