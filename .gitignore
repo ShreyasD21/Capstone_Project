@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# Large or regenerable data
+data/raw/*
+!data/raw/.gitkeep
+data/cache/*
+!data/cache/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.zst
+Extras/
+
+# Per-run outputs (the summary table is kept)
+results/*
+!results/.gitkeep
+!results/summary.md
+
+# Personal reference material (not part of the project)
+Project_Explainer.docx
+.obsidian/

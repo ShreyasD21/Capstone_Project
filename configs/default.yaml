@@ -1,0 +1,43 @@
+# Full experiment configuration. Paths are relative to the repository root.
+seed: 42
+
+paths:
+  raw: data/raw/lichess_db_puzzle.csv.zst
+  processed: data/processed
+  cache: data/cache
+  splits: data/splits
+  human: data/human/comments.csv     # optional human-written test comments
+  results: results
+
+data:
+  min_popularity: 80
+  min_plays: 500
+  per_motif: 500                     # puzzles sampled per motif before filtering
+  comments_per_puzzle: 1
+  named_fraction: 0.5                # share of comments that name the motif word
+  square_fraction: 0.3               # share of comments that mention a square
+  min_words: 3
+  max_words: 12
+  max_qubits: 12
+  split: {train: 0.70, val: 0.15, test: 0.15}
+
+text:
+  parser: grammar                    # grammar | bobcat
+  bobcat_dir: null                   # local Bobcat model folder, only for parser: bobcat
+
+quantum:
+  ansatz: iqp                        # only iqp; see text/circuits.py
+  layers: 1
+  qubits: {noun: 1, sentence: 2}
+  max_sim_qubits: 15                 # hard limit: 15 qubits peaked at ~2 GB, 18 exceeded 6 GB, 22 crashed a 16 GB machine
+
+tensor:
+  dims: {noun: 2, sentence: 4}
+
+train:
+  batch_size: 32
+  lr_classical: 1.0e-3
+  lr_quantum: 1.0e-2
+  max_epochs: 40
+  patience: 5
+  seeds: [0, 1, 2]

@@ -1,0 +1,3 @@
+# Q1 ablation: changes one quantum setting from configs/default.yaml
+quantum:
+  qubits: {noun: 1, sentence: 3}

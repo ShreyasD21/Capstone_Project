@@ -1,0 +1,3 @@
+# Q1 ablation: changes one quantum setting from configs/default.yaml
+quantum:
+  layers: 2

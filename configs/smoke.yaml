@@ -1,0 +1,45 @@
+# Tiny configuration for checking the whole pipeline end to end in a few minutes.
+# Results from this config are not meaningful.
+seed: 42
+
+paths:
+  raw: data/raw/lichess_db_puzzle.csv.zst
+  processed: data/processed/smoke
+  cache: data/cache
+  splits: data/splits/smoke
+  human: data/human/comments.csv
+  results: results/smoke
+
+data:
+  min_popularity: 80
+  min_plays: 500
+  per_motif: 25
+  comments_per_puzzle: 1
+  named_fraction: 0.5
+  square_fraction: 0.3
+  min_words: 3
+  max_words: 12
+  max_qubits: 12
+  split: {train: 0.70, val: 0.15, test: 0.15}
+  max_rows: 300000                   # only scan the start of the raw file
+
+text:
+  parser: grammar                    # grammar | bobcat
+  bobcat_dir: null                   # local Bobcat model folder, only for parser: bobcat
+
+quantum:
+  ansatz: iqp
+  layers: 1
+  qubits: {noun: 1, sentence: 2}
+  max_sim_qubits: 15                 # hard limit: 15 qubits peaked at ~2 GB, 18 exceeded 6 GB, 22 crashed a 16 GB machine
+
+tensor:
+  dims: {noun: 2, sentence: 4}
+
+train:
+  batch_size: 16
+  lr_classical: 1.0e-3
+  lr_quantum: 1.0e-2
+  max_epochs: 2
+  patience: 2
+  seeds: [0]
